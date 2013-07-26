@@ -1,3 +1,4 @@
+require 'verlane'
 require 'versionomy'
 require 'yaml'
 
@@ -32,6 +33,8 @@ def save_version(version)
   
   File.open('VERSION.yml', 'w') {|io| io.write yaml.to_yaml}
   File.open('VERSION', 'w') {|io| io.write version.to_s}
+  
+  puts "New version #{version.to_s}"
 end
 
 
