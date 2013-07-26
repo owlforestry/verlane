@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Verlane::VERSION
   spec.authors       = ["Mikko Kokkonen"]
   spec.email         = ["mikko@owlforestry.com"]
-  spec.description   = %q{Simple versioning library}
+  spec.description   = %q{Simple version number management library, using Rake tasks}
   spec.summary       = %q{Manage version numbers}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/owlforestry/verlane"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
