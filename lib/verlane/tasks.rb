@@ -1,0 +1,1 @@
+load 'verlane/tasks/verlane.rake'
