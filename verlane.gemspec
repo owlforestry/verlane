@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "verlane"
   spec.version       = Verlane::VERSION
   spec.authors       = ["Mikko Kokkonen"]
-  spec.email         = ["mikko@mikian.com"]
+  spec.email         = ["mikko@owlforestry.com"]
   spec.description   = %q{Simple versioning library}
   spec.summary       = %q{Manage version numbers}
   spec.homepage      = ""
