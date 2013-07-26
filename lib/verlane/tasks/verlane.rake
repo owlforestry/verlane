@@ -28,6 +28,7 @@ def save_version(version)
     {}
   end
   yaml.merge!(version.values_hash)
+  yaml[:short] = version.to_s
   
   File.open('VERSION.yml', 'w') {|io| io.write yaml.to_yaml}
   File.open('VERSION', 'w') {|io| io.write version.to_s}
