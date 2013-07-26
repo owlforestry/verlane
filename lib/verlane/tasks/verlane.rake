@@ -4,7 +4,7 @@ require 'yaml'
 VERSION = if File.exists?('VERSION')
   Versionomy.parse(File.read('VERSION').strip)
 else
-  Versionomy.create('0.0.1')
+  Versionomy.parse('0.0.1')
 end
 
 def bump_version(version)
