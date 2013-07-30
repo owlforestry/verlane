@@ -2,7 +2,9 @@ require 'verlane'
 require 'versionomy'
 require 'yaml'
 
-VERSION = if File.exists?('VERSION')
+VERSION = if File.exists?('VERSION.yml')
+  Versionomy.parse(YAML.load_file('VERSION.yml'))
+elsif File.exists?('VERSION')
   Versionomy.parse(File.read('VERSION').strip)
 else
   Versionomy.parse('0.0.1')
@@ -23,18 +25,26 @@ def bump_version(version)
 end
 
 def save_version(version)
-  yaml = if File.exists?('VERSION.yml')
+  ver = if File.exists?('VERSION.yml')
     YAML.load_file('VERSION.yml')
   else
     {}
   end
-  yaml.merge!(version.values_hash)
-  yaml[:short] = version.to_s
+  ver.merge!(version.values_hash)
+  ver[:string] = version.to_s
+  ver[:short]  = version.to_s
   
-  File.open('VERSION.yml', 'w') {|io| io.write yaml.to_yaml}
-  File.open('VERSION', 'w') {|io| io.write version.to_s}
+  if File.exists?('VERSION.yml')
+    File.open('VERSION.yml', 'w') {|io| io.write ver.to_yaml}
+    system "git add VERSION.yml"
+    system "git commit VERSION.yml -m 'Bumped version to #{ver[:string]}'"
+  else
+    File.open('VERSION', 'w') {|io| io.write ver[:string]}
+    system "git add VERSION"
+    system "git commit VERSION -m 'Bumped version to #{ver[:string]}'"
+  end
   
-  puts "New version #{version.to_s}"
+  puts "New version #{ver[:string]}"
 end
 
 
