@@ -3,11 +3,11 @@ require 'versionomy'
 require 'yaml'
 
 VERSION = if File.exists?('VERSION.yml')
-  Versionomy.parse(YAML.load_file('VERSION.yml'))
+  Versionomy.create(YAML.load_file('VERSION.yml'))
 elsif File.exists?('VERSION')
   Versionomy.parse(File.read('VERSION').strip)
 else
-  Versionomy.parse('0.0.1')
+  Versionomy.create(major: 0, minor: 0, tiny: 1)
 end
 
 def bump_version(version)
