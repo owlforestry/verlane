@@ -3,25 +3,42 @@ require 'versionomy'
 require 'yaml'
 
 VERSION = if File.exists?('VERSION.yml')
-  Versionomy.create(YAML.load_file('VERSION.yml'))
+  yaml = YAML.load_file('VERSION.yml')
+  ver = Versionomy.create(yaml)
+  if !ver.prerelease? and yaml[:build] and yaml[:build] > ver.tiny2
+    ver = ver.change(tiny2: yaml[:build])
+  end
+  ver
 elsif File.exists?('VERSION')
   Versionomy.parse(File.read('VERSION').strip)
 else
   Versionomy.create(major: 0, minor: 0, tiny: 1)
 end
 
-def bump_version(version)
-  field = case version.release_type
-    when :alpha
-      :alpha_version
-    when :beta
-      :beta_version
-    when :release_candidate
-      :release_candidate_version
-    else
-      :tiny2
+def bump_version(version, fields = {})
+  if fields.empty?
+    key = case version.release_type
+      when :alpha
+        :alpha_version
+      when :beta
+        :beta_version
+      when :release_candidate
+        :release_candidate_version
+      else
+        :tiny2
+    end
+    fields[key] = true
   end
-  version.bump(field)
+
+  build = version.tiny2
+  
+  new_ver = fields.inject(version) {|version, chg| field, change = chg; change.kind_of?(TrueClass) ? version.bump(field) : version.change(field => change) }
+
+  if new_ver.tiny2 < build
+    new_ver.change(tiny2: build)
+  else
+    new_ver
+  end
 end
 
 def save_version(version)
@@ -33,6 +50,7 @@ def save_version(version)
   ver.merge!(version.values_hash)
   ver[:string] = version.to_s
   ver[:short]  = version.to_s
+  ver[:build]  = version.tiny2
   
   if File.exists?('VERSION.yml')
     File.open('VERSION.yml', 'w') {|io| io.write ver.to_yaml}
@@ -61,9 +79,9 @@ namespace :version do
   
   namespace :bump do
     VERSION.field_names[0..4].each do |field|
-      desc "Bump version to #{VERSION.bump(field).to_s}"
+      desc "Bump version to #{bump_version(VERSION, field => true).to_s}"
       task field do
-        save_version(VERSION.bump(field))
+        save_version(bump_version(VERSION, field => true))
       end
     end
   end
@@ -73,16 +91,16 @@ namespace :version do
     save_version(VERSION.release)
   end
   
-  desc "Prepare for release #{VERSION.bump(:minor).change(release_type: :beta).to_s}"
+  desc "Prepare for release #{bump_version(VERSION, minor: true, release_type: :beta).to_s}"
   task :pre do
-    save_version(VERSION.bump(:minor).change(release_type: :beta))
+    save_version(bump_version(VERSION, minor: true, release_type: :beta))
   end
   
   namespace :pre do
     VERSION.field_names[0..2].each do |field|
-      desc "Prepare for release #{VERSION.bump(field).change(release_type: :beta).to_s}"
+      desc "Prepare for release #{bump_version(VERSION, field => true, release_type: :beta).to_s}"
       task field do
-        save_version(VERSION.bump(field).change(release_type: :beta))
+        save_version(bump_version(VERSION, field => true, release_type: :beta))
       end
     end
   end
